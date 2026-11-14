@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Christmas Tree Lights</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 16px;
+    font-family: system-ui, sans-serif;
+    color: #fff;
+    background: radial-gradient(ellipse at bottom, #1b2a4a 0%, #070b16 100%);
+    overflow: hidden;
+    transition: background 0.6s;
+  }
+  body.on { background: radial-gradient(ellipse at bottom, #2b3557 0%, #0d1224 100%); }
+  h1 { margin: 0; font-size: clamp(1.5rem, 5vw, 2.5rem); text-align: center; }
+  svg { width: min(360px, 90vw); height: auto; overflow: visible; }
+
+  .bulb { fill: #444; transition: fill 0.3s, filter 0.3s; }
+  .on .bulb { animation: twinkle 1.2s infinite alternate; }
+  .on .bulb.red    { fill: #ff3b3b; filter: drop-shadow(0 0 6px #ff3b3b); }
+  .on .bulb.yellow { fill: #ffd93b; filter: drop-shadow(0 0 6px #ffd93b); }
+  .on .bulb.blue   { fill: #3bb4ff; filter: drop-shadow(0 0 6px #3bb4ff); }
+  .on .bulb.green  { fill: #5dff6b; filter: drop-shadow(0 0 6px #5dff6b); }
+  .on .bulb.pink   { fill: #ff6bd6; filter: drop-shadow(0 0 6px #ff6bd6); }
+  @keyframes twinkle { from { opacity: 1; } to { opacity: 0.45; } }
+
+  .star { fill: #665c2a; transition: fill 0.3s, filter 0.3s; }
+  .on .star { fill: #ffe14d; filter: drop-shadow(0 0 12px #ffe14d); animation: pulse 2s infinite; }
+  @keyframes pulse { 50% { filter: drop-shadow(0 0 22px #ffe14d); } }
+
+  button {
+    font: inherit;
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding: 14px 36px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    color: #fff;
+    background: #c62828;
+    box-shadow: 0 6px 0 #7f1414;
+    transition: transform 0.08s, box-shadow 0.08s, background 0.3s;
+  }
+  button:active { transform: translateY(4px); box-shadow: 0 2px 0 #7f1414; }
+  .on button { background: #2e7d32; box-shadow: 0 6px 0 #1b4d1e; }
+  .on button:active { box-shadow: 0 2px 0 #1b4d1e; }
+  button:focus-visible { outline: 3px solid #ffe14d; outline-offset: 4px; }
+
+  .count { opacity: 0.75; font-size: 0.95rem; }
+
+  .snow {
+    position: fixed; top: -10px; color: #fff; pointer-events: none;
+    animation: fall linear infinite; opacity: 0.8;
+  }
+  @keyframes fall { to { transform: translateY(110vh); } }
+</style>
+</head>
+<body>
+  <h1>🎄 Light Up the Tree! 🎄</h1>
+
+  <svg viewBox="0 0 300 380" aria-label="Christmas tree">
+    <!-- trunk -->
+    <rect x="130" y="320" width="40" height="45" fill="#6d4321"/>
+    <!-- tree layers -->
+    <polygon points="150,40 70,150 230,150" fill="#1f7a3a"/>
+    <polygon points="150,90 45,230 255,230" fill="#1a6b33"/>
+    <polygon points="150,160 20,325 280,325" fill="#155c2b"/>
+    <!-- star -->
+    <polygon class="star" points="150,8 159,32 185,32 164,47 172,72 150,57 128,72 136,47 115,32 141,32"/>
+    <!-- lights get added here -->
+    <g id="lights"></g>
+  </svg>
+
+  <button id="toggle" aria-pressed="false">Turn Lights ON</button>
+  <div class="count" id="count">Lights switched on 0 times</div>
+
+<script>
+  // Place bulbs along three garland lines on the tree
+  const garlands = [
+    { y1: 110, y2: 135, x1: 105, x2: 200, n: 5 },
+    { y1: 185, y2: 215, x1: 80,  x2: 225, n: 7 },
+    { y1: 260, y2: 305, x1: 50,  x2: 255, n: 9 },
+  ];
+  const colors = ["red", "yellow", "blue", "green", "pink"];
+  const group = document.getElementById("lights");
+  let i = 0;
+  for (const g of garlands) {
+    for (let k = 0; k < g.n; k++) {
+      const t = k / (g.n - 1);
+      const x = g.x1 + (g.x2 - g.x1) * t;
+      const y = g.y1 + (g.y2 - g.y1) * t + Math.sin(t * Math.PI) * 12;
+      const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      c.setAttribute("cx", x);
+      c.setAttribute("cy", y);
+      c.setAttribute("r", 7);
+      c.setAttribute("class", "bulb " + colors[i % colors.length]);
+      c.style.animationDelay = (Math.random() * 1.2).toFixed(2) + "s";
+      group.appendChild(c);
+      i++;
+    }
+  }
+
+  // The button
+  const btn = document.getElementById("toggle");
+  const count = document.getElementById("count");
+  let on = false, times = 0;
+  btn.addEventListener("click", () => {
+    on = !on;
+    document.body.classList.toggle("on", on);
+    btn.textContent = on ? "Turn Lights OFF" : "Turn Lights ON";
+    btn.setAttribute("aria-pressed", on);
+    if (on) {
+      times++;
+      count.textContent = `Lights switched on ${times} time${times === 1 ? "" : "s"}`;
+    }
+  });
+
+  // Gentle snowfall
+  for (let s = 0; s < 40; s++) {
+    const flake = document.createElement("div");
+    flake.className = "snow";
+    flake.textContent = "❄";
+    flake.style.left = Math.random() * 100 + "vw";
+    flake.style.fontSize = (8 + Math.random() * 12) + "px";
+    flake.style.animationDuration = (6 + Math.random() * 8) + "s";
+    flake.style.animationDelay = (-Math.random() * 14) + "s";
+    document.body.appendChild(flake);
+  }
+</script>
+</body>
+</html>
