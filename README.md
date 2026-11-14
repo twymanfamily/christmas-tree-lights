@@ -2,6 +2,5 @@
 
 A tiny web game: press the button to turn the Christmas tree lights on and off.
 
-**Play it:** https://twymanfamily.github.io/christmas-tree-lights/
+**Play it:** download or clone this repo and open `index.html` in any web browser.
 
-Or just open `index.html` in any web browser.
